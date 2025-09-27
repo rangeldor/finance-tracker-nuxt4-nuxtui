@@ -1,42 +1,106 @@
-
 <template>
-  <UModal v-model:open="isOpen" title="Add Transaction" :close="{ onClick: () => resetForm() }">
-    <UButton icon="i-heroicons-plus-circle" color="primary" variant="solid" label="Add" @click="isOpen = true"/>
-    
+  <UModal
+    v-model:open="isOpen"
+    title="Add Transaction"
+    :close="{ onClick: () => resetForm() }"
+  >
+    <UButton
+      icon="i-heroicons-plus-circle"
+      color="primary"
+      variant="solid"
+      label="Add"
+      @click="isOpen = true"
+    />
+
     <template #body>
-      <UForm :schema="schema" :state="state" class="space-y-4" @submit="onSubmit">
-         <UFormField :required="true" label="Transaction Type" name="type" class="mb-4">
-          <USelect placeholder="Select the transaction type" :items="types" v-model="state.type" class="w-full" />
+      <UForm
+        :schema="schema"
+        :state="state"
+        class="space-y-4"
+        @submit="onSubmit"
+      >
+        <UFormField
+          :required="true"
+          label="Transaction Type"
+          name="type"
+          class="mb-4"
+        >
+          <USelect
+            v-model="state.type"
+            placeholder="Select the transaction type"
+            :items="types"
+            class="w-full"
+          />
         </UFormField>
 
         <UFormField label="Amount" :required="true" name="amount" class="mb-4">
-          <UInput type="number" placeholder="Amount" v-model="state.amount" class="w-full" />
+          <UInput
+            v-model="state.amount"
+            type="number"
+            placeholder="Amount"
+            class="w-full"
+          />
         </UFormField>
 
-        <UFormField label="Transaction date" :required="true" name="created_at" class="mb-4">
-          <UInput type="date" icon="i-heroicons-calendar-days-20-solid" v-model="state.created_at" class="w-full" />
+        <UFormField
+          label="Transaction date"
+          :required="true"
+          name="created_at"
+          class="mb-4"
+        >
+          <UInput
+            v-model="state.created_at"
+            type="date"
+            icon="i-heroicons-calendar-days-20-solid"
+            class="w-full"
+          />
         </UFormField>
 
-        <UFormField label="Description" hint="Optional" name="description" class="mb-4">
-          <UInput placeholder="Description" v-model="state.description" class="w-full" />
+        <UFormField
+          label="Description"
+          hint="Optional"
+          name="description"
+          class="mb-4"
+        >
+          <UInput
+            v-model="state.description"
+            placeholder="Description"
+            class="w-full"
+          />
         </UFormField>
 
-        <UFormField :required="true" label="Category" name="category" class="mb-4" v-if="state.type === 'Expense'">
-          <USelect placeholder="Category" :items="categories" v-model="state.category" class="w-full" />
+        <UFormField
+          v-if="state.type === 'Expense'"
+          :required="true"
+          label="Category"
+          name="category"
+          class="mb-4"
+        >
+          <USelect
+            v-model="state.category"
+            placeholder="Category"
+            :items="categories"
+            class="w-full"
+          />
         </UFormField>
-        
+
         <div class="flex justify-end">
-          <UButton type="submit" label="Save" color="primary" :loading="insLoading" />
+          <UButton
+            type="submit"
+            label="Save"
+            color="primary"
+            :loading="insLoading"
+          />
         </div>
-      </UForm>    
+      </UForm>
     </template>
-  </UModal>   
+  </UModal>
 </template>
 
 <script setup lang="ts">
-import { categories, types } from '~/utils/constants';
+import { categories, types } from '~/utils/constants'
 import type { FormSubmitEvent } from '@nuxt/ui'
-import z from 'zod';
+import z from 'zod'
 
 interface IEmit {
   (e: 'save'): void
@@ -67,7 +131,12 @@ const savingSchema = z.object({
 })
 
 const schema = z.intersection(
-  z.discriminatedUnion('type', [incomeSchema, expenseSchema, investmentSchema, savingSchema]),
+  z.discriminatedUnion('type', [
+    incomeSchema,
+    expenseSchema,
+    investmentSchema,
+    savingSchema
+  ]),
   defaultSchema
 )
 
@@ -96,7 +165,7 @@ const resetForm = () => {
 }
 
 const closeModal = () => {
-  isOpen.value = false  
+  isOpen.value = false
 }
 
 const savedTransactionToast = () => {
@@ -120,7 +189,7 @@ const errorTransactionToast = () => {
 const toast = useToast()
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   insLoading.value = true
-  
+
   try {
     const { error } = await supabase.from('transactions').upsert(event.data)
 
@@ -129,13 +198,12 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     } else {
       throw error
     }
-
   } catch (error) {
     errorTransactionToast()
   } finally {
     insLoading.value = false
   }
-  
+
   emit('save')
   closeModal()
   resetForm()

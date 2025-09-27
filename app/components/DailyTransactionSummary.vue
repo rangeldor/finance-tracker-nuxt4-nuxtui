@@ -1,14 +1,12 @@
-
-
-
 <template>
   <div
-    class="grid grid-cols-2 py-4 border-b border-gray-200 dark:border-gray-800 text-gray-500 dark:text-gray-400 font-bold">
+    class="grid grid-cols-2 border-b border-gray-200 py-4 font-bold text-gray-500 dark:border-gray-800 dark:text-gray-400"
+  >
     <div class="flex items-center justify-between">
       {{ date }}
     </div>
 
-    <div class="flex items-center justify-end mr-10">
+    <div class="mr-10 flex items-center justify-end">
       {{ currency }}
     </div>
   </div>
@@ -18,7 +16,7 @@
 import type { ITransaction } from '~/types/transaction'
 
 interface IProps {
-  date: string | number,
+  date: string | number
   transactions: ITransaction[]
 }
 
@@ -38,5 +36,4 @@ const currency = computed(() => {
 
   return getFormattedCurrency(sum)
 })
-
 </script>

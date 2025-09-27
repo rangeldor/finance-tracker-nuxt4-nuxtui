@@ -1,18 +1,22 @@
-import { createClient } from "@supabase/supabase-js"
+import { createClient } from '@supabase/supabase-js'
 import { faker } from '@faker-js/faker'
 import 'dotenv/config'
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY, {
-  auth: { persistSession: false }
-})
+  process.env.SUPABASE_KEY,
+  {
+    auth: { persistSession: false }
+  }
+)
 const categories = ['Food', 'Housing', 'Car', 'Entertainment']
 
 async function seedTransactions() {
   // Delete existing data
-  const { error: deleteError } = await supabase.from('transactions')
-    .delete().gte('id', 0)
+  const { error: deleteError } = await supabase
+    .from('transactions')
+    .delete()
+    .gte('id', 0)
 
   if (deleteError) {
     console.error('Error deleting existing data:', deleteError)
@@ -21,7 +25,11 @@ async function seedTransactions() {
 
   let transactions = []
 
-  for (let year = new Date().getFullYear(); year > new Date().getFullYear() - 2; year--) {
+  for (
+    let year = new Date().getFullYear();
+    year > new Date().getFullYear() - 2;
+    year--
+  ) {
     for (let i = 0; i < 10; i++) {
       const date = new Date(
         year,
@@ -67,7 +75,9 @@ async function seedTransactions() {
     }
   }
 
-  const { error: insertError } = await supabase.from('transactions').upsert(transactions)
+  const { error: insertError } = await supabase
+    .from('transactions')
+    .upsert(transactions)
 
   if (insertError) {
     console.error('Error inserting data:', insertError)
