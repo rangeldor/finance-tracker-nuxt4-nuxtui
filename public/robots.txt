@@ -1,2 +1,11 @@
-User-Agent: *
-Disallow:
+
+# Informações gerais
+User-agent: *
+Allow: /
+
+# Bloqueio de páginas específicas (se necessário)
+Disallow: /admin/
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://www.mysite.com.br/sitemap.xml

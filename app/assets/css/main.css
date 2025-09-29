@@ -1,6 +1,22 @@
 @import 'tailwindcss';
 @import '@nuxt/ui';
 
+html {
+  scrollbar-color: var(--ui-color-primary-500) transparent;
+  scrollbar-width: thin;
+}
+
+.page-enter-active,
+.page-leave-active {
+  transition: all 0.1s;
+}
+
+.page-enter-from,
+.page-leave-to {
+  opacity: 0.5;
+  filter: grayscale(1);
+}
+
 @theme {
   --font-sans: 'Roboto', 'Inter', sans-serif;
 }

@@ -2,16 +2,47 @@
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
+
   devtools: {
     enabled: true,
     timeline: {
       enabled: true
     }
   },
+
   css: ['~/assets/css/main.css'],
-  modules: ['@nuxt/ui', '@nuxt/eslint', '@nuxtjs/supabase'],
+
+  modules: [
+    '@nuxt/ui',
+    '@nuxt/eslint',
+    '@nuxtjs/sitemap',
+    '@nuxt/image',
+    '@nuxtjs/supabase'
+  ],
+
   supabase: {
     redirect: true
+  },
+
+  sourcemap: {
+    client: 'hidden'
+  },
+
+  site: {
+    url: 'https://www.mysite.com.br',
+    name: 'Finance Tracker',
+    description: 'Finance Tracker - A simple app to track your finances',
+    defaultLocale: 'pt-BR'
+  },
+
+  sitemap: {
+    defaults: {
+      lastmod: new Date().toISOString(),
+      changefreq: 'monthly',
+      priority: 1.0
+    },
+    enabled: true,
+    urls: ['/']
   },
 
   app: {

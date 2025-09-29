@@ -6,10 +6,3 @@
     </main>
   </div>
 </template>
-
-<style>
-html {
-  scrollbar-color: var(--ui-color-primary-500) transparent;
-  scrollbar-width: thin;
-}
-</style>
