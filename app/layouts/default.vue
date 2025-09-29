@@ -7,26 +7,9 @@
   </div>
 </template>
 
-<script setup>
-// Link to Google Fonts
-useHead({
-  link: [
-    {
-      rel: 'preconnect',
-      href: 'https://fonts.googleapis.com'
-    },
-    {
-      rel: 'stylesheet',
-      href: 'https://fonts.googleapis.com/css2?family=Roboto&display=swap',
-      crossorigin: ''
-    }
-  ]
-})
-</script>
-
 <style>
-/* Set the font family for the entire site */
-body {
-  font-family: 'Roboto';
+html {
+  scrollbar-color: var(--ui-color-primary-500) transparent;
+  scrollbar-width: thin;
 }
 </style>

@@ -13,7 +13,7 @@ interface IEmit {
 const { transaction } = defineProps<IProps>()
 
 const { getFormattedCurrency } = useCurrency()
-const toast = useToast()
+const { toastError, toastSuccess } = useAppToast()
 
 const emit = defineEmits<IEmit>()
 
@@ -32,22 +32,16 @@ const deleteTransaction = async () => {
   try {
     await supabase.from('transactions').delete().eq('id', transaction.id)
 
-    toast.add({
+    toastSuccess({
       title: 'Success deleting transaction',
-      icon: 'i-heroicons-check-circle-20-solid',
-      description: 'The transaction has been successfully deleted.',
-      color: 'success',
-      duration: 3000
+      description: 'The transaction has been successfully deleted.'
     })
 
     emit('delete', transaction.id)
   } catch (error) {
-    toast.add({
+    toastError({
       title: 'Error deleting transaction',
-      icon: 'i-heroicons-exclamation-circle-20-solid',
-      description: 'The transaction has been successfully deleted.',
-      color: 'error',
-      duration: 3000
+      description: 'The transaction has been successfully deleted.'
     })
   } finally {
     isLoading.value = false

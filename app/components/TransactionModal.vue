@@ -89,7 +89,7 @@
             type="submit"
             label="Save"
             color="primary"
-            :loading="insLoading"
+            :loading="isLoading"
           />
         </div>
       </UForm>
@@ -107,7 +107,9 @@ interface IEmit {
 }
 const emit = defineEmits<IEmit>()
 
-const insLoading = ref(false)
+const { toastError, toastSuccess } = useAppToast()
+
+const isLoading = ref(false)
 const supabase = useSupabaseClient()
 
 const defaultSchema = z.object({
@@ -168,40 +170,27 @@ const closeModal = () => {
   isOpen.value = false
 }
 
-const savedTransactionToast = () => {
-  toast.add({
-    title: 'Success',
-    icon: 'i-heroicons-check-circle',
-    description: 'Transaction saved.',
-    color: 'success'
-  })
-}
-
-const errorTransactionToast = () => {
-  toast.add({
-    title: 'Error',
-    description: 'Transaction not saved.',
-    icon: 'i-heroicons-x-circle',
-    color: 'error'
-  })
-}
-
-const toast = useToast()
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-  insLoading.value = true
+  isLoading.value = true
 
   try {
     const { error } = await supabase.from('transactions').upsert(event.data)
 
     if (!error) {
-      savedTransactionToast()
+      toastSuccess({
+        title: 'Success',
+        description: 'Transaction saved.'
+      })
     } else {
       throw error
     }
   } catch (error) {
-    errorTransactionToast()
+    toastError({
+      title: 'Error',
+      description: 'Transaction not saved.'
+    })
   } finally {
-    insLoading.value = false
+    isLoading.value = false
   }
 
   emit('save')

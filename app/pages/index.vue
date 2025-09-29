@@ -64,7 +64,11 @@
 </template>
 
 <script lang="ts" setup>
-const selectedTransactionItem = ref(transactionItems[1]?.id)
+const user = useSupabaseUser()
+const selectedTransactionItem = ref(
+  user?.value?.user_metadata?.transaction_view ?? transactionItems[1]
+)
+
 const { getDateByPeriod } = useSelectedTimePeriod()
 
 const {
