@@ -35,7 +35,18 @@
         </div>
       </div>
       <div>
-        <TransactionModal @save="getTransactions()" />
+        <UButton
+          icon="i-heroicons-plus-circle"
+          color="primary"
+          variant="solid"
+          label="Add"
+          @click="saveTransaction()"
+        />
+        <TransactionModal
+          v-model:is-open="showModal"
+          v-model:transaction="selectedTransaction"
+          @save="getTransactions()"
+        />
       </div>
     </section>
 
@@ -54,6 +65,7 @@
           :key="transaction.id"
           :transaction="transaction"
           @delete="getTransactions()"
+          @edit="editTransaction"
         />
       </div>
     </section>
@@ -64,10 +76,14 @@
 </template>
 
 <script lang="ts" setup>
+import type { ITransaction } from '~/types/transaction'
+
 const user = useSupabaseUser()
 const selectedTransactionItem = ref(
   user?.value?.user_metadata?.transaction_view ?? transactionItems[1]
 )
+const showModal = ref(false)
+const selectedTransaction = ref<ITransaction | undefined>()
 
 const { getDateByPeriod } = useSelectedTimePeriod()
 
@@ -83,6 +99,16 @@ const {
 const getTransactions = () => {
   const period = getDateByPeriod(selectedTransactionItem.value)
   fetchTransactions(period)
+}
+
+const editTransaction = (transaction: ITransaction) => {
+  selectedTransaction.value = transaction
+  showModal.value = true
+}
+
+const saveTransaction = () => {
+  selectedTransaction.value = undefined
+  showModal.value = true
 }
 
 onMounted(() => {

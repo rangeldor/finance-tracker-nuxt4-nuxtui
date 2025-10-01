@@ -80,11 +80,13 @@ export const useFetchTransactions = () => {
   const transactionsGroupedByDate = computed<ITransactionByDate>(() => {
     return (transactions.value ?? []).reduce<ITransactionByDate>(
       (acc, transaction) => {
-        const date = new Date(transaction.created_at).toLocaleDateString()
-        if (!acc[date]) {
+        const date = String(transaction.created_at || new Date()).split('T')[0]
+        if (date && !acc[date]) {
           acc[date] = []
         }
-        acc[date].push(transaction)
+        if (date && acc[date]) {
+          acc[date].push(transaction)
+        }
         return acc
       },
       {}

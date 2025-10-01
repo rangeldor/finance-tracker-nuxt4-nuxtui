@@ -1,17 +1,9 @@
 <template>
   <UModal
     v-model:open="isOpen"
-    title="Add Transaction"
+    :title="isEditing ? 'Edit' : 'Add'"
     :close="{ onClick: () => resetForm() }"
   >
-    <UButton
-      icon="i-heroicons-plus-circle"
-      color="primary"
-      variant="solid"
-      label="Add"
-      @click="isOpen = true"
-    />
-
     <template #body>
       <UForm
         :schema="schema"
@@ -30,6 +22,7 @@
             placeholder="Select the transaction type"
             :items="types"
             class="w-full"
+            :disabled="isEditing"
           />
         </UFormField>
 
@@ -48,12 +41,19 @@
           name="created_at"
           class="mb-4"
         >
-          <UInput
-            v-model="state.created_at"
-            type="date"
-            icon="i-heroicons-calendar-days-20-solid"
-            class="w-full"
-          />
+          <UPopover>
+            <UButton color="neutral" variant="subtle" icon="i-lucide-calendar">
+              {{
+                state.created_at
+                  ? df.format(state.created_at.toDate(getLocalTimeZone()))
+                  : 'Select a date'
+              }}
+            </UButton>
+
+            <template #content>
+              <UCalendar v-model="state.created_at" class="p-2" />
+            </template>
+          </UPopover>
         </UFormField>
 
         <UFormField
@@ -98,22 +98,39 @@
 </template>
 
 <script setup lang="ts">
+import {
+  CalendarDate,
+  DateFormatter,
+  getLocalTimeZone
+} from '@internationalized/date'
 import { categories, types } from '~/utils/constants'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import z from 'zod'
+import type { ITransaction } from '~/types/transaction'
 
 interface IEmit {
   (e: 'save'): void
 }
+
+const df = new DateFormatter('en-US', {
+  dateStyle: 'medium'
+})
+
+const transaction = defineModel<ITransaction | undefined>('transaction')
+
 const emit = defineEmits<IEmit>()
 
 const { toastError, toastSuccess } = useAppToast()
 
 const isLoading = ref(false)
+const isOpen = defineModel<boolean>('isOpen')
+
 const supabase = useSupabaseClient()
 
+const isEditing = computed(() => !!transaction.value)
+
 const defaultSchema = z.object({
-  created_at: z.string(),
+  created_at: z.any(),
   description: z.string().optional(),
   amount: z.number().positive('Amount needs to be more than 0')
 })
@@ -123,7 +140,7 @@ const incomeSchema = z.object({
 })
 const expenseSchema = z.object({
   type: z.literal('Expense'),
-  category: z.enum(categories)
+  category: z.enum(categories as [string, ...string[]])
 })
 const investmentSchema = z.object({
   type: z.literal('Investment')
@@ -144,23 +161,18 @@ const schema = z.intersection(
 
 type Schema = z.output<typeof schema>
 
-const state = reactive<Partial<Schema>>({
-  type: undefined,
-  amount: 0,
-  created_at: undefined,
-  description: undefined,
-  category: undefined
-})
-
+const today = new Date()
 const initialState = {
-  type: undefined,
+  type: 'Income' as const,
   amount: 0,
-  created_at: undefined,
-  description: undefined,
+  created_at: shallowRef(
+    new CalendarDate(today.getFullYear(), today.getMonth() + 1, today.getDate())
+  ),
+  description: '',
   category: undefined
 }
 
-const isOpen = ref(false)
+const state = reactive<Partial<Schema>>({ ...initialState })
 
 const resetForm = () => {
   Object.assign(state, initialState)
@@ -174,7 +186,15 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   isLoading.value = true
 
   try {
-    const { error } = await supabase.from('transactions').upsert(event.data)
+    const createdAt = state.created_at
+      ? `${state.created_at.year}-${String(state.created_at.month).padStart(2, '0')}-${String(state.created_at.day).padStart(2, '0')}`
+      : new Date().toISOString().split('T')[0]
+
+    const { error } = await supabase.from('transactions').upsert({
+      ...event.data,
+      created_at: createdAt,
+      id: transaction.value?.id
+    })
 
     if (!error) {
       toastSuccess({
@@ -197,4 +217,30 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   closeModal()
   resetForm()
 }
+
+watch(
+  () => transaction.value,
+  (newTransaction) => {
+    if (newTransaction) {
+      const dateStr = (
+        newTransaction.created_at || new Date().toISOString()
+      ).split('T')[0]!
+      const [year, month, day] = dateStr.split('-').map(Number)
+      const safeYear = year || today.getFullYear()
+      const safeMonth = month || today.getMonth() + 1
+      const safeDay = day || today.getDate()
+
+      Object.assign(state, {
+        type: (newTransaction.type ?? 'Income') as Schema['type'],
+        amount: newTransaction.amount ?? 0,
+        created_at: shallowRef(new CalendarDate(safeYear, safeMonth, safeDay)),
+        description: newTransaction.description ?? '',
+        ...(newTransaction.category && { category: newTransaction.category })
+      })
+    } else {
+      resetForm()
+    }
+  },
+  { immediate: true }
+)
 </script>

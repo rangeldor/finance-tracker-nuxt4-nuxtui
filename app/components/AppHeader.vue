@@ -4,10 +4,7 @@
     <div class="flex items-center justify-center gap-4">
       <ColorModeButton />
       <UDropdownMenu v-if="user" :items="items">
-        <UAvatar
-          src="https://avatars.githubusercontent.com/u/739984?v=4"
-          alt="Avatar"
-        />
+        <UAvatar class="cursor-pointer" :src="url" alt="Avatar" />
       </UDropdownMenu>
     </div>
   </header>
@@ -18,6 +15,7 @@ import type { DropdownMenuItem } from '@nuxt/ui'
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
+const { url } = useAvatarUrl()
 
 const userEmail = computed(() => {
   return user.value?.email ? user.value.email : 'Account'

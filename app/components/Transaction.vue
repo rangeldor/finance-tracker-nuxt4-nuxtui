@@ -8,6 +8,7 @@ interface IProps {
 
 interface IEmit {
   (e: 'delete', id: number): void
+  (e: 'edit', transaction: ITransaction): void
 }
 
 const { transaction } = defineProps<IProps>()
@@ -53,7 +54,7 @@ const items = ref<DropdownMenuItem[]>([
     label: 'Edit',
     icon: 'i-heroicons-pencil-square-20-solid',
     onSelect: () => {
-      console.log('Edit clicked')
+      emit('edit', transaction)
     }
   },
   {
